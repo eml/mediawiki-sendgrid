@@ -1,0 +1,23 @@
+{
+    "name": "mediawiki/sendgridmailer",
+    "authors" : [
+        {
+            "name": "Eric Lambrecht",
+            "email": "eric@mrtechlab.com",
+            "homepage": "http://mrtechlab.com",
+            "role": "Developer"
+        }
+    ],
+    "homepage" : "http://mrtechlab.com",
+    "support" : {
+        "email": "eric@mrtechlab.com",
+        "issues": "https://phabricator.wikimedia.org/",
+        "irc": "irc://irc.freenode.org/wikimedia-dev",
+        "source": "https://github.com/eml/mediawiki-extensions-SendgridMailer"
+    },
+    "description": "Sendgrid library for Mediawiki extension Sendgrid",
+    "license" : "GPL-2.0+",
+    "require": {
+      "sendgrid/sendgrid": "~5.1"
+    }
+}
