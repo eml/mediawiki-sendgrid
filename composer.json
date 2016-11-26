@@ -16,8 +16,5 @@
         "source": "https://github.com/eml/mediawiki-extensions-SendgridMailer"
     },
     "description": "Sendgrid library for Mediawiki extension Sendgrid",
-    "license" : "GPL-2.0+",
-    "require": {
-      "sendgrid/sendgrid": "~5.1"
-    }
+    "license" : "GPL-2.0+"
 }

@@ -39,31 +39,47 @@ class SendgridMailerHooks {
 	public static function onAlternateUserMailer( array $headers, array $to,
 						      MailAddress $from, $subject, $body ) {
 
-		$fromSG = new SendGrid\Email($from->name, $from->address);
-		$content = new SendGrid\Content("text/html", $body);
+		//wfDebugLog( 'SendgridMailer', print_r(array($headers, $to, $from, $subject, $body), true) );
 
-		$apiKey = getenv('SENDGRID_API_KEY');
-		$sg = new \SendGrid($apiKey);
+		// should be set in LocalSettings.php
+		global $wgSendgridAPIKey;
+		$sendgrid_apikey = $wgSendgridAPIKey;
 
-		wfDebug("SendgridMailer", "Sending mail via Sendgrid\n" );
+                $url = 'https://api.sendgrid.com/';
 
 		foreach ( $to as $recip ) {
-      try {
-        $recipSG = new SendGrid\Email($recip->name, $recip->address);
+wfDebugLog('SendgridMailer', "sending to " . $recip->address);
+		$params = array(
+		    'to'        => $recip->address,
+		    'toname'    => $recip->name,
+		    'from'      => $from->address,
+		    'fromname'  => $from->name,
+		    'subject'   => $subject,
+		    'text'      => $body,
+		  );
 
-        $mail = new SendGrid\Mail($fromSG, $subject, $recipSG, $content);
-        $response = $sg->client->mail()->send()->post($mail);
+		$request =  $url.'api/mail.send.json';
 
-        $responseCode = $response->statusCode();
-        $responseHeaders = $response->headers();
-        $responseBody = $response->body();
+		// Generate curl request
+		$session = curl_init($request);
+		// Tell PHP not to use SSLv3 (instead opting for TLS)
+		curl_setopt($session, CURLOPT_SSLVERSION, 'CURL_SSLVERSION_TLSv1_2');
+		curl_setopt($session, CURLOPT_HTTPHEADER, array('Authorization: Bearer ' . $sendgrid_apikey));
+		// Tell curl to use HTTP POST
+		curl_setopt ($session, CURLOPT_POST, true);
+		// Tell curl that this is the body of the POST
+		curl_setopt ($session, CURLOPT_POSTFIELDS, $params);
+		// Tell curl not to return headers, but do return the response
+		curl_setopt($session, CURLOPT_HEADER, false);
+		curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
 
-        wfDebugLog( 'SendgridMailer', "SG response: " . print_r(array("code" => $responseCode, "headers" => $responseHeaders, "body" => $responseBody ), true) );
-			} catch ( Exception $e ) {
-				wfDebugLog( 'SendgridMailer', "Sendgrid Mailer failed: $e" );
-				return $e;
-			}
-		}
+		// obtain response
+		$response = curl_exec($session);
+		curl_close($session);
+
+		// print everything out
+		wfDebugLog('SendgridMailer', print_r($response, true));
+              }
 
 		// Alternate Mailer hooks should return false to skip regular false sending
 		return false;
